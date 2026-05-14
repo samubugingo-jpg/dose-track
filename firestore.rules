@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Phase 4: Validation Blueprint
+    function isValidDoseRecord(data) {
+      return data.keys().hasAll(['userId', 'patientId', 'examDate', 'examType', 'ctdiVol', 'dlp', 'effectiveDose', 'drlExceeded', 'createdAt'])
+        && data.keys().size() == 9
+        && data.userId == request.auth.uid
+        && data.patientId is string && data.patientId.size() <= 100
+        && data.examDate is string && data.examDate.size() <= 64
+        && data.examType is string && data.examType.size() <= 100
+        && data.ctdiVol is number && data.ctdiVol >= 0
+        && data.dlp is number && data.dlp >= 0
+        && data.effectiveDose is number && data.effectiveDose >= 0
+        && data.drlExceeded is bool
+        && data.createdAt == request.time;
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['userId', 'recordId', 'action', 'timestamp'])
+        && data.userId == request.auth.uid
+        && data.recordId is string && data.recordId.size() <= 128
+        && data.action in ['create', 'update', 'delete']
+        && data.timestamp == request.time;
+    }
+
+    match /doseRecords/{recordId} {
+      allow get: if isSignedIn() && isOwner(existing().userId) && isValidId(recordId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+        && isValidId(recordId)
+        && isValidDoseRecord(incoming());
+        
+      allow update: if isSignedIn()
+        && isValidId(recordId)
+        && isOwner(existing().userId)
+        && isValidDoseRecord(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['patientId', 'examDate', 'examType', 'ctdiVol', 'dlp', 'effectiveDose', 'drlExceeded']);
+        
+      allow delete: if isSignedIn() && isOwner(existing().userId) && isValidId(recordId);
+    }
+
+    match /auditTrail/{logId} {
+      allow create: if isSignedIn() && isValidId(logId) && isValidAuditLog(incoming());
+      allow get: if isSignedIn() && isOwner(existing().userId) && isValidId(logId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

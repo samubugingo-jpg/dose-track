@@ -1,0 +1,6 @@
+{
+  "name": "DoseTrack Rwanda",
+  "description": "A clinical dosimetry portal for monitoring radiological doses, tracking DRL exceedances, and ML-driven dose predictions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

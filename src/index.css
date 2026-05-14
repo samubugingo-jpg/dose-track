@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Georgia", serif;
+
+  --color-primary: #FFFFFF;
+  --color-on-primary: #0C4A6E;
+  --color-primary-container: #F0F9FF;
+  --color-on-primary-container: #0369A1;
+  --color-accent: #0EA5E9;
+  --color-accent-gold: #0EA5E9;
+
+  --color-secondary: #0284C7;
+  --color-on-secondary: #FFFFFF;
+  --color-secondary-container: rgba(14, 165, 233, 0.05);
+  --color-on-secondary-container: #0EA5E9;
+
+  --color-error: #E11D48;
+  --color-on-error: #ffffff;
+  --color-error-container: rgba(225, 29, 72, 0.05);
+  --color-on-error-container: #E11D48;
+
+  --color-background: #F0F9FF;
+  --color-on-background: #0C4A6E;
+  --color-surface: #FFFFFF;
+  --color-on-surface: #0C4A6E;
+  --color-surface-variant: #F8FAFC;
+  --color-on-surface-variant: rgba(12, 74, 110, 0.5);
+
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F0F9FF;
+  --color-surface-container: #E0F2FE;
+  --color-surface-container-high: #BAE6FD;
+  --color-surface-container-highest: #7DD3FC;
+
+  --color-glass: rgba(255, 255, 255, 0.7);
+  --color-glass-border: rgba(14, 165, 233, 0.1);
+
+  --color-border-subtle: rgba(14, 165, 233, 0.08);
+  --color-background-muted: #F0F9FF;
+  
+  --radius-xl: 0rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-background font-sans antialiased relative overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+}
+
+.scanline {
+  @apply fixed inset-0 z-50 pointer-events-none opacity-[0.03];
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 0, 0, 0.05) 50%,
+    transparent
+  );
+  background-size: 100% 4px;
+}
+
+@keyframes scanline-anim {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scanline-bar {
+  @apply fixed left-0 right-0 h-40 z-50 pointer-events-none opacity-[0.01];
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1), transparent);
+  animation: scanline-anim 15s linear infinite;
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-glass border border-glass-border;
+  }
+  
+  .serif-title {
+    @apply font-serif italic;
+  }
+  
+  .letter-spacing-widest {
+    letter-spacing: 0.2em;
+  }
+}

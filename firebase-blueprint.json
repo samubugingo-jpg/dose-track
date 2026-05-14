@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "DoseRecord": {
+      "title": "Dose Record",
+      "description": "A clinical radiological dose record.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who recorded the dose." },
+        "patientId": { "type": "string", "description": "A unique identifier for the patient (e.g., KGL-882-01)." },
+        "examDate": { "type": "string", "format": "date-time", "description": "The date and time the exam was performed." },
+        "examType": { "type": "string", "description": "The type of CT protocol (e.g., Head Routine)." },
+        "ctdiVol": { "type": "number", "description": "Volume computed tomography dose index." },
+        "dlp": { "type": "number", "description": "Dose length product." },
+        "effectiveDose": { "type": "number", "description": "Calculated effective dose in mSv." },
+        "drlExceeded": { "type": "boolean", "description": "Whether the record exceeds national DRL limits." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server-side creation timestamp." }
+      },
+      "required": ["userId", "patientId", "examDate", "examType", "ctdiVol", "dlp", "effectiveDose", "drlExceeded", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "A record of data modifications for security and accountability.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who performed the action." },
+        "recordId": { "type": "string", "description": "The ID of the record that was modified." },
+        "action": { "type": "string", "enum": ["create", "update", "delete"], "description": "The type of action performed." },
+        "changes": { "type": "object", "description": "Map of field names to changed values." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Server-side timestamp of the audit entry." }
+      },
+      "required": ["userId", "recordId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/doseRecords/{recordId}": {
+      "schema": "DoseRecord",
+      "description": "Collection of all dose records."
+    },
+    "/auditTrail/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit trail for all record modifications."
+    }
+  }
+}
